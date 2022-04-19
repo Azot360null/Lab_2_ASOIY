@@ -1,3 +1,12 @@
+/*
+* Автор: Смирнов Денис
+* Создано: 18.03.2022
+* Версия: 3
+*
+* Соавтор: Скворцов Даниил
+* 19.04 - Добавил checkBox приостановления работы программы. Мелкие правки кода
+**/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSerialPortInfo>
@@ -12,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     ui->temperatureTextBox->setText("0");
     ui->pressureTextBox->setText("0");
+    blockedTimer = false;
 
     //Определяет порт, к которму подключено ардуино.
 
@@ -53,28 +63,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         Arduino->setDataTerminalReady(true);
 
         QObject::connect(Arduino, SIGNAL(readyRead()), this, SLOT(Read()));
-        //QTimer *timer2 = new QTimer(this);
-        /*QObject::connect(timer2, SIGNAL(timeout()), this, SLOT(TestVoid()));
-        timer2->start(10000);*/
 
-        QTimer *timer = new QTimer(this);
-        QObject::connect(timer, SIGNAL(timeout()), this, SLOT(Write()));
-        timer->start(1000);
-
-        /*if (tryFirst)
-        {
-            QTimer *timer2 = new QTimer(this);
-            timer2->start(10000);
-            TestVoid();
-        }*/
-
-
+        Timer = new QTimer(this);
+        QObject::connect(Timer, SIGNAL(timeout()), this, SLOT(Write()));
+        Timer->start(1000);
     }
     else
     {
         qDebug() << "Не удалось найти правильный порт для Arduino.\n";
     }
-
 }
 
 MainWindow::~MainWindow()
@@ -84,7 +81,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::Read()
 {
-    //qDebug() << "dfpxjgpesojgpsojh";
     if(tryFirst)
     {
         Data = Arduino->readAll();
@@ -123,7 +119,6 @@ void MainWindow::Read()
 void MainWindow::Write()
 {
     Arduino->write("0"); // Отправляет запрос
-    //Arduino->SLOT
 }
 
 void MainWindow::TestVoid()
@@ -133,6 +128,20 @@ void MainWindow::TestVoid()
         qDebug() << "The port settings are incorrect!";
         qDebug() << "Incorrect baud rate!";
         access = true;
+    }
+}
+
+/* Скворцов: основной алгоритм для реализации работы checkBox'a */
+void MainWindow::on_signalsBlocker_stateChanged(int arg1)
+{
+    if(blockedTimer == true)
+    {
+        Timer->blockSignals(false);
+        blockedTimer = false;
+    } else
+    {
+        Timer->blockSignals(true);
+        blockedTimer = true;
     }
 }
 

@@ -1,3 +1,12 @@
+/*
+* Автор: Смирнов Денис
+* Создано: 18.03.2022
+* Версия: 3
+*
+* Соавтор: Скворцов Даниил
+* 19.04 - Добавил checkBox приостановления работы программы. Мелкие правки кода
+**/
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -23,13 +32,17 @@ private slots:
     void Write();
     void TestVoid();
 
+    void on_signalsBlocker_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *Arduino;
     QByteArray Data;
     QString Buffer;
+    QTimer *Timer;
     bool tryFirst;
     bool access;
+    bool blockedTimer;
 
 };
 #endif // MAINWINDOW_H
